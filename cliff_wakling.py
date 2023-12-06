@@ -4,6 +4,7 @@ import gymnasium as gym
 from gymnasium.envs.toy_text.cliffwalking import CliffWalkingEnv
 from gymnasium.error import DependencyNotInstalled
 from os import path
+from random import randint
 
 
 # Do not change this class
@@ -191,6 +192,36 @@ class CliffWalking(CliffWalkingEnv):
 # Create an environment
 env = CliffWalking(render_mode="human")
 observation, info = env.reset(seed=30)
+
+def policy_evaluation(env, policy, discount_factor, theta, state_values):
+    delta = theta*2
+    state_len = 48
+    action_len = 4
+    while (delta > theta):
+        delta = 0
+        for s in range(state_len):
+            new_s = 0
+            for a in range(action_len):
+                transitions_list = env.P[s][a]
+                for i in transitions_list:
+                    transition_prob, next_state, reward, done = i
+                    if (done):                    
+                        new_s += policy[s,a] * transition_prob * reward
+                    else:
+                        new_s += policy[s,a] * transition_prob * (reward + discount_factor * state_values[next_state])
+            delta = max(delta, np.abs(new_s - state_values[s])) 
+            state_values[s] = new_s    
+    return state_values
+
+policy = np.zeros((48, 4))
+for i in range(48):
+    policy[i][randint(0, 3)] = 1
+
+theta = 0.0001
+discount_factor = 0.99
+state_values = np.zeros(48)
+states = policy_evaluation(env, policy, discount_factor, theta, state_values)
+print(states)
 
 # Define the maximum number of iterations
 max_iter_number = 1000
