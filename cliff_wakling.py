@@ -209,6 +209,24 @@ def policy_evaluation(mdp, policy, discount_factor, theta, state_values):
             state_values[s] = v    
     return state_values
 
+def policy_improvement(mdp, policy, state_values, discount_factor):
+    policy_stable = True
+    state_len = 48
+    action_len = 4
+    for s in range(state_len):
+        old_action = policy[s]
+        temp_array = np.zeros((action_len))
+        for a in range(action_len):
+            transition_prob, next_state, reward, done = mdp.P[s][a][0]
+            if (done):                    
+                temp_array[a] += transition_prob * reward
+            else:
+                temp_array[a] += transition_prob * (reward + discount_factor * state_values[next_state])
+        policy[s]= np.argmax(temp_array)
+        if old_action != policy[s]: 
+            policy_stable = False
+            
+    return policy_stable, policy
 
 # Define the maximum number of iterations
 max_iter_number = 1000
