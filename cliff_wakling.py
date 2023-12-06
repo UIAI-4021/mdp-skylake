@@ -228,6 +228,24 @@ def policy_improvement(mdp, policy, state_values, discount_factor):
             
     return policy_stable, policy
 
+def policy_iteration(mdp, discount_factor, theta):
+    state_values = np.zeros(48)
+    policy = np.zeros(48)
+    for i in range(48):
+        policy[i] = [randint(0, 3)]
+    policy_stable = False
+    count = 1000
+    while not policy_stable:
+        state_values = policy_evaluation(mdp, policy, discount_factor, theta, state_values)
+        policy_stable, policy = policy_improvement(mdp, policy, state_values, discount_factor)
+        if policy_stable and count > 0:
+            policy_stable = False
+            count = count - 1
+        
+    return state_values, policy
+
+state_value ,policy = policy_iteration(env, 0.99, 0.0001)
+
 # Define the maximum number of iterations
 max_iter_number = 1000
 
