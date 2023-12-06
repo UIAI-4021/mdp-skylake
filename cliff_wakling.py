@@ -232,7 +232,7 @@ def policy_iteration(mdp, discount_factor, theta):
     state_values = np.zeros(48)
     policy = np.zeros(48)
     for i in range(48):
-        policy[i] = [randint(0, 3)]
+        policy[i] = randint(0, 3)
     policy_stable = False
     count = 1000
     while not policy_stable:
@@ -254,7 +254,7 @@ for __ in range(max_iter_number):
     # Note: .sample() is used to sample random action from the environment's action space
 
     # Choose an action (Replace this random action with your agent's policy)
-    action = np.argmax(policy[env.s])
+    action = policy[env.s]
 
     # Perform the action and receive feedback from the environment
     next_state, reward, done, truncated, info = env.step(action)
