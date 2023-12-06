@@ -188,40 +188,27 @@ class CliffWalking(CliffWalkingEnv):
                 np.array(pygame.surfarray.pixels3d(self.window_surface)), axes=(1, 0, 2)
             )
 
-
 # Create an environment
 env = CliffWalking(render_mode="human")
 observation, info = env.reset(seed=30)
 
-def policy_evaluation(env, policy, discount_factor, theta, state_values):
-    delta = theta*2
+def policy_evaluation(mdp, policy, discount_factor, theta, state_values):
+    delta = theta * 2
     state_len = 48
-    action_len = 4
     while (delta > theta):
         delta = 0
         for s in range(state_len):
-            new_s = 0
-            for a in range(action_len):
-                transitions_list = env.P[s][a]
-                for i in transitions_list:
-                    transition_prob, next_state, reward, done = i
-                    if (done):                    
-                        new_s += policy[s,a] * transition_prob * reward
-                    else:
-                        new_s += policy[s,a] * transition_prob * (reward + discount_factor * state_values[next_state])
-            delta = max(delta, np.abs(new_s - state_values[s])) 
-            state_values[s] = new_s    
+            v = 0
+            a = policy[s]
+            transition_prob, next_state, reward, done = mdp.P[s][a][0]
+            if (done):                    
+                v = transition_prob * reward
+            else:
+                v = transition_prob * (reward + discount_factor * state_values[next_state])
+            delta = max(delta, np.abs(v - state_values[s])) 
+            state_values[s] = v    
     return state_values
 
-policy = np.zeros((48, 4))
-for i in range(48):
-    policy[i][randint(0, 3)] = 1
-
-theta = 0.0001
-discount_factor = 0.99
-state_values = np.zeros(48)
-states = policy_evaluation(env, policy, discount_factor, theta, state_values)
-print(states)
 
 # Define the maximum number of iterations
 max_iter_number = 1000
@@ -231,7 +218,7 @@ for __ in range(max_iter_number):
     # Note: .sample() is used to sample random action from the environment's action space
 
     # Choose an action (Replace this random action with your agent's policy)
-    action = env.action_space.sample()
+    action = np.argmax(policy[env.s])
 
     # Perform the action and receive feedback from the environment
     next_state, reward, done, truncated, info = env.step(action)
